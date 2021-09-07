@@ -31,7 +31,12 @@
 #include "Configuration.h"
 #include "ControlPanel.h"
 
-
+typedef struct GEAR
+{
+    Uint16 display[4];
+    Uint64 numerator;
+    Uint64 denominator;
+};
 
 typedef struct FEED_THREAD
 {
@@ -41,22 +46,47 @@ typedef struct FEED_THREAD
     Uint64 denominator;
 } FEED_THREAD;
 
-
-
-class FeedTable
+class Table<typename T>
 {
 private:
-    const FEED_THREAD *table;
+    const T *table;
     Uint16 selectedRow;
     Uint16 numRows;
 
 public:
-    FeedTable(const FEED_THREAD *table, Uint16 numRows, Uint16 defaultSelection);
+    FeedTable(const T *table, Uint16 numRows, Uint16 defaultSelection)
+    {
+        this->table = table;
+        this->numRows = numRows;
+        this->selectedRow = defaultSelection;
+    }
 
-    const FEED_THREAD *current(void);
-    const FEED_THREAD *next(void);
-    const FEED_THREAD *previous(void);
+    const T* current(void)
+    {
+        return &table[selectedRow];
+    }
+
+    const T* next(void)
+    {
+        if( this->selectedRow < this->numRows - 1 )
+        {
+            this->selectedRow++;
+        }
+        return this->current();
+    }
+
+    const T* previous(void)
+    {
+        if( this->selectedRow > 0 )
+        {
+            this->selectedRow--;
+        }
+        return this->current();
+    }
 };
+
+using FeedTable = Table<FEED_THREAD>;
+using GearTable = Table<GEAR>;
 
 
 class FeedTableFactory
@@ -71,6 +101,18 @@ public:
     FeedTableFactory(void);
 
     FeedTable *getFeedTable(bool metric, bool thread);
+};
+
+class GearTableFactory
+{
+private:
+    GearTable table;
+public:
+    GearTableFactory(void;)
+    inline GearTable* getGearTable(void)
+    {
+        return &(this->table);
+    }
 };
 
 

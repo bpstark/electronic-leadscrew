@@ -26,6 +26,14 @@
 
 #include "Tables.h"
 
+// Gear Definitions
+const GEAR gear_table[] =
+{
+ { .display = {BLANK, BLANK, BLANK, LETTER_A}, .numerator = 1, .denominator = 1},
+ { .display = {BLANK, BLANK, BLANK, LETTER_B}, .numerator = 1, .denominator = 2},
+ { .display = {BLANK, BLANK, BLANK, LETTER_C}, .numerator = 2, .denominator = 1},
+};
+
 
 //
 // INCH THREAD DEFINITIONS
@@ -206,40 +214,6 @@ const FEED_THREAD metric_feed_table[] =
  { .display = {BLANK, ONE | POINT, ZERO,  ZERO},  .leds = LED_FEED | LED_MM, HMM_FRACTION_FEED(100) },
 };
 
-
-
-
-
-FeedTable::FeedTable(const FEED_THREAD *table, Uint16 numRows, Uint16 defaultSelection)
-{
-    this->table = table;
-    this->numRows = numRows;
-    this->selectedRow = defaultSelection;
-}
-
-const FEED_THREAD *FeedTable :: current(void)
-{
-    return &table[selectedRow];
-}
-
-const FEED_THREAD *FeedTable :: next(void)
-{
-    if( this->selectedRow < this->numRows - 1 )
-    {
-        this->selectedRow++;
-    }
-    return this->current();
-}
-
-const FEED_THREAD *FeedTable :: previous(void)
-{
-    if( this->selectedRow > 0 )
-    {
-        this->selectedRow--;
-    }
-    return this->current();
-}
-
 FeedTableFactory::FeedTableFactory(void):
         inchThreads(inch_thread_table, sizeof(inch_thread_table)/sizeof(inch_thread_table[0]), 12),
         inchFeeds(inch_feed_table, sizeof(inch_feed_table)/sizeof(inch_feed_table[0]), 4),
@@ -273,4 +247,8 @@ FeedTable *FeedTableFactory::getFeedTable(bool metric, bool thread)
         }
     }
 
+}
+GearTableFactory::GearTableFactory(void):
+        table(gear_table, sizeof(gear_table)/sizeof(gear_table[0]), 0)
+{
 }

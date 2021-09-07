@@ -40,7 +40,7 @@
 //================================================================================
 
 // For Imperial leadscrews: pitch in Threads Per Inch (TPI)
-#define LEADSCREW_TPI 12
+#define LEADSCREW_TPI 10
 
 // For metric leadscrews: pitch in hundredths of a millimeter (HMM)
 // Example: 200hmm = 2mm
@@ -70,7 +70,8 @@
 // Separate step and microstep settings for feed rates.  Redefine these if your
 // lathe has a separate feed drive train with a different ratio.
 #define STEPPER_MICROSTEPS_FEED STEPPER_MICROSTEPS
-#define STEPPER_RESOLUTION_FEED STEPPER_RESOLUTION
+//Lathe has 12.5 TPI feed screw so STEPPE_RESOLUTION_FEED = STEPPER_RESOLUTION * FEEDSCREW_TPI/LEADSCREW_TPI
+#define STEPPER_RESOLUTION_FEED 250
 
 // Step, direction and enable pins are normally active-high
 // #define INVERT_STEP_PIN true
@@ -103,7 +104,13 @@
 //#define ENCODER_USE_EQEP2
 
 
-
+//================================================================================
+//                                 GEARBOX
+// Define if you want to enable usage of the QCGB available on some lathes
+// If so you can define your gear box in the tables.cpp file
+//================================================================================
+//uncomment to enable gear box usage
+#define USE_GEARBOX
 
 //================================================================================
 //                               CALCULATIONS
