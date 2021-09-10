@@ -36,7 +36,7 @@ typedef struct GEAR
     Uint16 display[4];
     Uint64 numerator;
     Uint64 denominator;
-};
+} GEAR;
 
 typedef struct FEED_THREAD
 {
@@ -46,7 +46,7 @@ typedef struct FEED_THREAD
     Uint64 denominator;
 } FEED_THREAD;
 
-class Table<typename T>
+template<typename T> class Table
 {
 private:
     const T *table;
@@ -54,7 +54,7 @@ private:
     Uint16 numRows;
 
 public:
-    FeedTable(const T *table, Uint16 numRows, Uint16 defaultSelection)
+    Table(const T *table, Uint16 numRows, Uint16 defaultSelection)
     {
         this->table = table;
         this->numRows = numRows;
@@ -85,8 +85,8 @@ public:
     }
 };
 
-using FeedTable = Table<FEED_THREAD>;
-using GearTable = Table<GEAR>;
+typedef Table<FEED_THREAD> FeedTable;
+typedef Table<GEAR> GearTable;
 
 
 class FeedTableFactory
@@ -108,7 +108,7 @@ class GearTableFactory
 private:
     GearTable table;
 public:
-    GearTableFactory(void;)
+    GearTableFactory(void);
     inline GearTable* getGearTable(void)
     {
         return &(this->table);
