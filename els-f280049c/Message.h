@@ -23,49 +23,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "F28x_Project.h"
 
-#ifndef __USERINTERFACE_H
-#define __USERINTERFACE_H
+#ifndef MESSAGE_H_
+#define MESSAGE_H_
 
-#include "ControlPanel.h"
-#include "Core.h"
-#include "Message.h"
-#include "Tables.h"
-
-
-
-class UserInterface
+typedef struct MESSAGE
 {
-private:
-    ControlPanel *controlPanel_;
-    Core *core_;
-    FeedTableFactory *feedTableFactory_;
+    Uint16 message[8];
+    Uint16 displayTime;
+    const MESSAGE *next;
+} MESSAGE;
 
-
-    bool metric_;
-    bool thread_;
-    bool reverse_;
-
-    FeedTable *feedTable_;
-    GearTable *gearTable_;
-
-    KEY_REG keys_;
-
-    const MESSAGE *message_;
-    Uint16 messageTime_;
-
-    const FEED_THREAD *loadFeedTable();
-    LED_REG calculateLEDs();
-    void setMessage(const MESSAGE *message);
-    void overrideMessage( void );
-    void clearMessage( void );
-
-public:
-    UserInterface(ControlPanel *controlPanel, Core *core, FeedTableFactory *feedTableFactory, GearTable *gearTable);
-
-    void loop( void );
-
-    void panicStepBacklog( void );
-};
-
-#endif // __USERINTERFACE_H
+#endif /* MESSAGE_H_ */

@@ -42,9 +42,13 @@ private:
 #ifdef USE_FLOATING_POINT
     float feed;
     float previousFeed;
+    float gear;
+    float previousGear;
 #else
     const FEED_THREAD *feed;
     const FEED_THREAD *previousFeed;
+    const GEAR *gear;
+    const GEAR *previousGear;
 #endif // USE_FLOATING_POINT
 
     int16 feedDirection;
@@ -60,6 +64,7 @@ public:
     Core( Encoder *encoder, StepperDrive *stepperDrive );
 
     void setFeed(const FEED_THREAD *feed);
+    void setGear(const GEAR *gear);
     void setReverse(bool reverse);
     Uint16 getRPM(void);
     bool isAlarm();
@@ -76,6 +81,14 @@ inline void Core :: setFeed(const FEED_THREAD *feed)
     this->feed = (float)feed->numerator / feed->denominator;
 #else
     this->feed = feed;
+#endif // USE_FLOATING_POINT
+}
+inline void Core :: setGear(const GEAR *gear)
+{
+#ifdef USE_FLOATING_POINT
+    this->gear = (float)gear->numerator / gear->denominator;
+#else
+    this->gear = gear;
 #endif // USE_FLOATING_POINT
 }
 
@@ -97,9 +110,9 @@ inline bool Core :: isPowerOn()
 inline int32 Core :: feedRatio(Uint32 count)
 {
 #ifdef USE_FLOATING_POINT
-    return ((float)count) * this->feed * feedDirection;
+    return ((float)count) * this->feed * this->gear * feedDirection;
 #else // USE_FLOATING_POINT
-    return ((long long)count) * feed->numerator / feed->denominator * feedDirection;
+    return ((long long)count) * (feed->numerator * gear->numerator)/ (feed->denominator * gear->denominator) * feedDirection;
 #endif // USE_FLOATING_POINT
 }
 
@@ -121,8 +134,8 @@ inline void Core :: ISR( void )
             stepperDrive->incrementCurrentPosition(feedRatio(encoder->getMaxCount()));
         }
 
-        // if the feed or direction changed, reset sync to avoid a big step
-        if( feed != previousFeed || feedDirection != previousFeedDirection) {
+        // if the feed, direction or gear changed, reset sync to avoid a big step
+        if( feed != previousFeed || feedDirection != previousFeedDirection || gear != previousGear) {
             stepperDrive->setCurrentPosition(desiredSteps);
         }
 
@@ -130,6 +143,7 @@ inline void Core :: ISR( void )
         previousSpindlePosition = spindlePosition;
         previousFeedDirection = feedDirection;
         previousFeed = feed;
+        previousGear = gear;
 
         // service the stepper drive state machine
         stepperDrive->ISR();

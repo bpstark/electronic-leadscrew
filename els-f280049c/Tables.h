@@ -30,10 +30,11 @@
 #include "F28x_Project.h"
 #include "Configuration.h"
 #include "ControlPanel.h"
+#include "Message.h"
 
 typedef struct GEAR
 {
-    Uint16 display[4];
+    MESSAGE message;
     Uint64 numerator;
     Uint64 denominator;
 } GEAR;
@@ -68,10 +69,7 @@ public:
 
     const T* next(void)
     {
-        if( this->selectedRow < this->numRows - 1 )
-        {
-            this->selectedRow++;
-        }
+        this->selectedRow = (this->selectedRow + 1) % this->numRows;
         return this->current();
     }
 
@@ -79,7 +77,11 @@ public:
     {
         if( this->selectedRow > 0 )
         {
-            this->selectedRow--;
+            --this->selectedRow;
+        }
+        else
+        {
+            this->selectedRow = this->numRows-1;
         }
         return this->current();
     }

@@ -70,8 +70,11 @@ StepperDrive stepperDrive;
 // Core engine
 Core core(&encoder, &stepperDrive);
 
+//Gear table factory
+GearTableFactory gearTableFactory;
+
 // User interface
-UserInterface userInterface(&controlPanel, &core, &feedTableFactory);
+UserInterface userInterface(&controlPanel, &core, &feedTableFactory, gearTableFactory.getGearTable());
 
 void main(void)
 {

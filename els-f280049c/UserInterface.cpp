@@ -70,44 +70,43 @@ const MESSAGE BACKLOG_PANIC_MESSAGE_2 =
 
 const Uint16 VALUE_BLANK[4] = { BLANK, BLANK, BLANK, BLANK };
 
-UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTableFactory *feedTableFactory)
+UserInterface :: UserInterface(ControlPanel *controlPanel, Core *core, FeedTableFactory *feedTableFactory, GearTable *gearTable):
+    controlPanel_(controlPanel)
+    , core_(core)
+    , feedTableFactory_(feedTableFactory)
+    , metric_(false)
+    , thread_(false)
+    , reverse_(false)
+    , feedTable_(NULL)
+    , gearTable_(gearTable)
 {
-    this->controlPanel = controlPanel;
-    this->core = core;
-    this->feedTableFactory = feedTableFactory;
-
-    this->metric = false; // start out with imperial
-    this->thread = false; // start out with feeds
-    this->reverse = false; // start out going forward
-
-    this->feedTable = NULL;
-
-    this->keys.all = 0xff;
+    this->keys_.all = 0xff;
 
     // initialize the core so we start up correctly
-    core->setReverse(this->reverse);
+    core->setReverse(this->reverse_);
     core->setFeed(loadFeedTable());
+    core->setGear(gearTable_->current());
 
     setMessage(&STARTUP_MESSAGE_1);
 }
 
 const FEED_THREAD *UserInterface::loadFeedTable()
 {
-    this->feedTable = this->feedTableFactory->getFeedTable(this->metric, this->thread);
-    return this->feedTable->current();
+    this->feedTable_ = this->feedTableFactory_->getFeedTable(this->metric_, this->thread_);
+    return this->feedTable_->current();
 }
 
 LED_REG UserInterface::calculateLEDs()
 {
     // get the LEDs for this feed
-    LED_REG leds = feedTable->current()->leds;
+    LED_REG leds = feedTable_->current()->leds;
 
-    if( this->core->isPowerOn() )
+    if( this->core_->isPowerOn() )
     {
         // and add a few of our own
         leds.bit.POWER = 1;
-        leds.bit.REVERSE = this->reverse;
-        leds.bit.FORWARD = ! this->reverse;
+        leds.bit.REVERSE = this->reverse_;
+        leds.bit.FORWARD = ! this->reverse_;
     }
     else
     {
@@ -120,33 +119,33 @@ LED_REG UserInterface::calculateLEDs()
 
 void UserInterface :: setMessage(const MESSAGE *message)
 {
-    this->message = message;
-    this->messageTime = message->displayTime;
+    this->message_ = message;
+    this->messageTime_ = message->displayTime;
 }
 
 void UserInterface :: overrideMessage( void )
 {
-    if( this->message != NULL )
+    if( this->message_ != NULL )
     {
-        if( this->messageTime > 0 ) {
-            this->messageTime--;
-            controlPanel->setMessage(this->message->message);
+        if( this->messageTime_ > 0 ) {
+            this->messageTime_--;
+            controlPanel_->setMessage(this->message_->message);
         }
         else {
-            this->message = this->message->next;
-            if( this->message == NULL )
-                controlPanel->setMessage(NULL);
+            this->message_ = this->message_->next;
+            if( this->message_ == NULL )
+                controlPanel_->setMessage(NULL);
             else
-                this->messageTime = this->message->displayTime;
+                this->messageTime_ = this->message_->displayTime;
         }
     }
 }
 
 void UserInterface :: clearMessage( void )
 {
-    this->message = NULL;
-    this->messageTime = 0;
-    controlPanel->setMessage(NULL);
+    this->message_ = NULL;
+    this->messageTime_ = 0;
+    controlPanel_->setMessage(NULL);
 }
 
 void UserInterface :: panicStepBacklog( void )
@@ -157,43 +156,48 @@ void UserInterface :: panicStepBacklog( void )
 void UserInterface :: loop( void )
 {
     // read the RPM up front so we can use it to make decisions
-    Uint16 currentRpm = core->getRPM();
+    Uint16 currentRpm = core_->getRPM();
 
     // display an override message, if there is one
     overrideMessage();
 
     // read keypresses from the control panel
-    keys = controlPanel->getKeys();
+    keys_ = controlPanel_->getKeys();
 
     // respond to keypresses
     if( currentRpm == 0 )
     {
         // these keys should only be sensitive when the machine is stopped
-        if( keys.bit.POWER ) {
-            this->core->setPowerOn(!this->core->isPowerOn());
+        if( keys_.bit.POWER ) {
+            this->core_->setPowerOn(!this->core_->isPowerOn());
             clearMessage();
         }
 
         // these should only work when the power is on
-        if( this->core->isPowerOn() ) {
-            if( keys.bit.IN_MM )
+        if( this->core_->isPowerOn() ) {
+            if( keys_.bit.IN_MM )
             {
-                this->metric = ! this->metric;
-                core->setFeed(loadFeedTable());
+                this->metric_ = ! this->metric_;
+                core_->setFeed(loadFeedTable());
             }
-            if( keys.bit.FEED_THREAD )
+            if( keys_.bit.FEED_THREAD )
             {
-                this->thread = ! this->thread;
-                core->setFeed(loadFeedTable());
+                this->thread_ = ! this->thread_;
+                core_->setFeed(loadFeedTable());
             }
-            if( keys.bit.FWD_REV )
+            if( keys_.bit.FWD_REV )
             {
-                this->reverse = ! this->reverse;
-                core->setReverse(this->reverse);
+                this->reverse_ = ! this->reverse_;
+                core_->setReverse(this->reverse_);
             }
-            if( keys.bit.SET )
+            if( keys_.bit.SET )
             {
-                setMessage(&SETTINGS_MESSAGE_1);
+#ifdef USE_GEARBOX
+                core_->setGear(gearTable_->next());
+                setMessage(&(gearTable_->current()->message));
+#else
+                setMessage(&SETTINGS_MESSAGE_1)
+#endif
             }
         }
     }
@@ -204,15 +208,15 @@ void UserInterface :: loop( void )
 #endif // IGNORE_ALL_KEYS_WHEN_RUNNING
 
         // these should only work when the power is on
-        if( this->core->isPowerOn() ) {
+        if( this->core_->isPowerOn() ) {
             // these keys can be operated when the machine is running
-            if( keys.bit.UP )
+            if( keys_.bit.UP )
             {
-                core->setFeed(feedTable->next());
+                core_->setFeed(feedTable_->next());
             }
-            if( keys.bit.DOWN )
+            if( keys_.bit.DOWN )
             {
-                core->setFeed(feedTable->previous());
+                core_->setFeed(feedTable_->previous());
             }
         }
 
@@ -221,14 +225,14 @@ void UserInterface :: loop( void )
 #endif // IGNORE_ALL_KEYS_WHEN_RUNNING
 
     // update the control panel
-    controlPanel->setLEDs(calculateLEDs());
-    controlPanel->setValue(feedTable->current()->display);
-    controlPanel->setRPM(currentRpm);
+    controlPanel_->setLEDs(calculateLEDs());
+    controlPanel_->setValue(feedTable_->current()->display);
+    controlPanel_->setRPM(currentRpm);
 
-    if( ! core->isPowerOn() )
+    if( ! core_->isPowerOn() )
     {
-        controlPanel->setValue(VALUE_BLANK);
+        controlPanel_->setValue(VALUE_BLANK);
     }
 
-    controlPanel->refresh();
+    controlPanel_->refresh();
 }

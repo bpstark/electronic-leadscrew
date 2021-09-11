@@ -26,12 +26,13 @@
 
 #include "Tables.h"
 
+#define GEAR_MSG(letter) .message = {.message = {LETTER_G, LETTER_E, LETTER_A, LETTER_R, BLANK, BLANK, BLANK, letter}, .displayTime = UI_REFRESH_RATE_HZ * 1.0}
 // Gear Definitions
 const GEAR gear_table[] =
 {
- { .display = {BLANK, BLANK, BLANK, LETTER_A}, .numerator = 1, .denominator = 1},
- { .display = {BLANK, BLANK, BLANK, LETTER_B}, .numerator = 1, .denominator = 2},
- { .display = {BLANK, BLANK, BLANK, LETTER_C}, .numerator = 2, .denominator = 1},
+ { GEAR_MSG(LETTER_A), .numerator = 1, .denominator = 1},
+ { GEAR_MSG(LETTER_B), .numerator = 1, .denominator = 2},
+ { GEAR_MSG(LETTER_C), .numerator = 2, .denominator = 1},
 };
 
 
