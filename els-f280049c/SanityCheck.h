@@ -52,8 +52,8 @@
 #error STEPPER_RESOLUTION must be between 100 and 2000
 #endif
 
-#if ENCODER_RESOLUTION < 100 || ENCODER_RESOLUTION > 10000
-#error ENCODER_RESOLUTION must be between 100 and 10000
+#if ENCODER_RESOLUTION < 100 || ENCODER_RESOLUTION > 15000
+#error ENCODER_RESOLUTION must be between 100 and 15000
 #endif
 
 #if defined(LEADSCREW_TPI) && defined(LEADSCREW_HMM)

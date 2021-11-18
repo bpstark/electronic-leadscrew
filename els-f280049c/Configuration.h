@@ -97,7 +97,8 @@
 //================================================================================
 
 // Encoder resolution (counts per revolution)
-#define ENCODER_RESOLUTION 4096
+//#define ENCODER_RESOLUTION 4096
+#define ENCODER_RESOLUTION 12288 //1024 P/R with a 3:1 pulley
 
 // Which encoder input to use
 #define ENCODER_USE_EQEP1
