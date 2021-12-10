@@ -70,8 +70,7 @@
 // Separate step and microstep settings for feed rates.  Redefine these if your
 // lathe has a separate feed drive train with a different ratio.
 #define STEPPER_MICROSTEPS_FEED STEPPER_MICROSTEPS
-//Lathe has 12.5 TPI feed screw so STEPPE_RESOLUTION_FEED = STEPPER_RESOLUTION * FEEDSCREW_TPI/LEADSCREW_TPI
-#define STEPPER_RESOLUTION_FEED 250
+#define STEPPER_RESOLUTION_FEED STEPPER_RESOLUTION
 
 // Step, direction and enable pins are normally active-high
 // #define INVERT_STEP_PIN true

@@ -30,9 +30,9 @@
 // Gear Definitions
 const GEAR gear_table[] =
 {
- { GEAR_MSG(LETTER_A), .numerator = 1, .denominator = 1},
- { GEAR_MSG(LETTER_B), .numerator = 1, .denominator = 2},
- { GEAR_MSG(LETTER_C), .numerator = 2, .denominator = 1},
+ { GEAR_MSG(LETTER_A), .numerator = 4, .denominator = 5},
+ { GEAR_MSG(LETTER_B), .numerator = 4, .denominator = 10},
+ { GEAR_MSG(LETTER_C), .numerator = 8, .denominator = 5},
 };
 
 
